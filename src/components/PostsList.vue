@@ -1,15 +1,19 @@
 <script lang="ts">
-import { LoadingStatus } from '@/enums';
-import type { Post } from '@/types';
-import { defineComponent } from 'vue';
-import type { PropType } from 'vue';
-import PostLoader from './PostLoader.vue';
+import { LoadingStatus } from '@/enums'
+import type { Post } from '@/types/types'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+import PostLoader from './PostLoader.vue'
 
 export default defineComponent({
   components: {
-    PostLoader
+    PostLoader,
   },
   props: {
+    modelValue: {
+      type: Boolean,
+      reqired: true,
+    },
     posts: {
       type: Array as PropType<Post[]>,
       required: true,
@@ -19,10 +23,11 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ['update:modelValue'],
   setup() {
-    return { LoadingStatus }
-  }
-});
+    return { LoadingStatus };
+  },
+})
 </script>
 
 <template>
@@ -31,13 +36,27 @@ export default defineComponent({
       <div class="block">
         <div class="block is-flex is-justify-content-space-between">
           <p class="title">Posts</p>
-          <button type="button" class="button is-link">Add New Post</button>
+
+          <button
+            type="button"
+            class="button is-link"
+            :class="{'is-light': modelValue}"
+            @click="$emit('update:modelValue', true)"
+          >
+            Add New Post
+          </button>
         </div>
 
-        <PostLoader v-if="loadingStatus === LoadingStatus.Loading"/>
-        <h3 v-else-if="loadingStatus === LoadingStatus.NoData" class="mt-2 has-text-centered">No posts yet.</h3>
+        <PostLoader v-if="loadingStatus === LoadingStatus.Loading" />
 
-        <h3 v-else-if="loadingStatus === LoadingStatus.Error" class="mt-2 has-text-centered has-text-danger">
+        <h3 v-else-if="loadingStatus === LoadingStatus.NoData" class="mt-2 has-text-centered">
+          No posts yet.
+        </h3>
+
+        <h3
+          v-else-if="loadingStatus === LoadingStatus.Error"
+          class="mt-2 has-text-centered has-text-danger"
+        >
           Something went wrong
         </h3>
 

@@ -6,3 +6,9 @@ export type Post = {
   title: string,
   body: string,
 }
+
+export type PostPostBody = {
+  userId: number,
+  title: string,
+  body: string,
+}
