@@ -1,6 +1,13 @@
 export enum LoadingStatus {
-  Loading,
-  Success,
-  Error,
-  NoData
+  Loading = 'loading',
+  Success = 'success',
+  Error = 'error',
+  NoData = 'noData',
+}
+
+export enum SidebarMode {
+  Off = 'off',
+  Add = 'add',
+  Preview = 'preview',
+  Edit = 'edit',
 }

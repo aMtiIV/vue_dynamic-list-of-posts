@@ -1,7 +1,8 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 import InputField from './InputField.vue'
 import TextAreaField from './TextAreaField.vue'
+import { SidebarMode } from '@/enums'
 
 export default defineComponent({
   components: {
@@ -10,20 +11,40 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: Boolean,
+      type: String as PropType<SidebarMode>,
       reqired: true,
     },
+    formTitle: {
+      type: String,
+      required: true,
+    },
+    confirmButtonLabel: {
+      type: String,
+      required: true,
+    },
+    sidebarModeOnCancel: {
+      type: String as PropType<SidebarMode>,
+      required: true,
+    },
+    startTitle: String,
+    startBody: String,
   },
-  data() {
+  data(): {
+    title: string,
+    body: string,
+    titleError: boolean,
+    bodyError: boolean,
+    sendError: boolean,
+  } {
     return {
-      title: '',
-      body: '',
+      title: this.startTitle || '',
+      body: this.startBody || '',
       titleError: false,
       bodyError: false,
       sendError: false,
     }
   },
-  emits: ['postAdd','update:modelValue'],
+  emits: ['submit', 'update:modelValue'],
   watch: {
     title() {
       this.titleError = false;
@@ -33,10 +54,10 @@ export default defineComponent({
     },
   },
   methods: {
-    setErrors(sendError?: boolean, titleError?: boolean, bodyError?: boolean) {
-      this.sendError = !!sendError;
-      this.titleError = !!titleError;
-      this.bodyError = !!bodyError;
+    setErrors(sendError: boolean = false, titleError: boolean = false, bodyError: boolean = false) {
+      this.sendError = sendError;
+      this.titleError = titleError;
+      this.bodyError = bodyError;
 
       if (!sendError && !titleError && !bodyError) {
         this.title = '';
@@ -44,7 +65,8 @@ export default defineComponent({
       }
     },
     handleSubmit() {
-      this.$emit('postAdd', this.title, this.body, this.setErrors);
+      this.sendError = false;
+      this.$emit('submit', this.title, this.body, this.setErrors);
     },
   },
 })
@@ -52,7 +74,7 @@ export default defineComponent({
 
 <template>
   <div class="content">
-    <h2>Create new post</h2>
+    <h2>{{formTitle}}</h2>
 
     <form @submit.prevent="handleSubmit">
       <InputField
@@ -75,11 +97,13 @@ export default defineComponent({
 
       <div class="field is-grouped">
         <div class="control">
-          <button type="submit" class="button is-link">Create</button>
+          <button type="submit" class="button is-link">{{confirmButtonLabel}}</button>
         </div>
 
         <div class="control">
-          <button type="reset" class="button is-link is-light" @click="$emit('update:modelValue', false)">Cancel</button>
+          <button type="reset" class="button is-link is-light" @click="$emit('update:modelValue', sidebarModeOnCancel)">
+            Cancel
+          </button>
         </div>
 
         <h3 v-if="sendError" class="mt-2 has-text-centered has-text-danger">

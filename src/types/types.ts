@@ -12,3 +12,9 @@ export type PostPostBody = {
   title: string,
   body: string,
 }
+
+export type PatchPostBody = {
+  userId?: number,
+  title?: string,
+  body?: string,
+}
