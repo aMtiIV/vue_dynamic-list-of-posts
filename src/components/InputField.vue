@@ -1,5 +1,6 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import type { Icon } from '@/enums';
+import { defineComponent, type PropType } from 'vue';
 
 export default defineComponent({
   props: {
@@ -24,6 +25,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    icon: {
+      type: String as PropType<Icon>,
+      required: true,
+    }
   },
   emits: ['update:modelValue'],
 });
@@ -48,7 +53,7 @@ export default defineComponent({
       />
 
       <span class="icon is-small is-left">
-        <i class="fas fa-user fa-heading"></i>
+        <i class="fas" :class="icon"></i>
       </span>
 
       <span

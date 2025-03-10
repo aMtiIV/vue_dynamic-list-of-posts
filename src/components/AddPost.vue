@@ -2,7 +2,7 @@
 import { defineComponent, type PropType } from 'vue'
 import InputField from './InputField.vue'
 import TextAreaField from './TextAreaField.vue'
-import { SidebarMode } from '@/enums'
+import { Icon, SidebarMode } from '@/enums'
 
 export default defineComponent({
   components: {
@@ -53,16 +53,14 @@ export default defineComponent({
       this.bodyError = false
     },
   },
+  setup() {
+    return { Icon };
+  },
   methods: {
     setErrors(sendError: boolean = false, titleError: boolean = false, bodyError: boolean = false) {
       this.sendError = sendError;
       this.titleError = titleError;
       this.bodyError = bodyError;
-
-      if (!sendError && !titleError && !bodyError) {
-        this.title = '';
-        this.body = '';
-      }
     },
     handleSubmit() {
       this.sendError = false;
@@ -84,6 +82,7 @@ export default defineComponent({
         label="Title"
         placeholder="Post title"
         error-message="Title is required"
+        :icon="Icon.User"
       />
 
       <TextAreaField

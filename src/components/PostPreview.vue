@@ -6,12 +6,16 @@ import { defineComponent, type PropType } from 'vue';
 import PostLoader from './PostLoader.vue';
 import NoCommentsYet from './NoCommentsYet.vue';
 import PostComment from './PostComment.vue';
+import WriteCommentBtn from './WriteCommentBtn.vue';
+import AddComment from './AddComment.vue';
 
 export default defineComponent({
   components: {
     PostLoader,
     NoCommentsYet,
     PostComment,
+    WriteCommentBtn,
+    AddComment,
   },
   props: {
     modelValue: {
@@ -23,10 +27,16 @@ export default defineComponent({
       required: true,
     }
   },
-  data(): { error: boolean, loadingStatus: LoadingStatus, comments: Comment[] } {
+  data(): {
+    error: boolean,
+    loadingStatus: LoadingStatus,
+    writeCommentFormOpened: boolean,
+    comments: Comment[],
+  } {
     return {
       error: false,
       loadingStatus: LoadingStatus.Loading,
+      writeCommentFormOpened: false,
       comments: [],
     }
   },
@@ -95,7 +105,7 @@ export default defineComponent({
     <p data-cy="PostBody">{{post.body}}</p>
   </div>
 
-  <div class="block">
+  <div class="block" v-if="!writeCommentFormOpened">
     <PostLoader v-if="loadingStatus === LoadingStatus.Loading"/>
     <NoCommentsYet v-else-if="loadingStatus === LoadingStatus.NoData"/>
 
@@ -109,5 +119,14 @@ export default defineComponent({
       :key="comment.id"
       :comment="comment"
     />
+
+    <WriteCommentBtn
+      v-if="(loadingStatus === LoadingStatus.Success || loadingStatus === LoadingStatus.NoData)"
+      v-model="writeCommentFormOpened"
+    />
+  </div>
+
+  <div class="block" v-else>
+    <AddComment v-model="writeCommentFormOpened"/>
   </div>
 </template>

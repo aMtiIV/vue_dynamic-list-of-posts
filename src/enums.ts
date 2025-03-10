@@ -11,3 +11,8 @@ export enum SidebarMode {
   Preview = 'preview',
   Edit = 'edit',
 }
+
+export enum Icon {
+  User = 'fa-user',
+  Envelope = 'fa-envelope',
+}
