@@ -21,16 +21,28 @@ export default defineComponent({
     loadingStatus: LoadingStatus,
     sidebarMode: SidebarMode,
     openedPostId: number,
+    savedName: string,
+    savedEmail: string,
   } {
     return {
       posts: [],
       loadingStatus: LoadingStatus.Loading,
       sidebarMode: SidebarMode.Off,
       openedPostId: -1,
+      savedName: '',
+      savedEmail: '',
     }
   },
   mounted() {
     this.handlePostsLoad();
+  },
+  watch: {
+    posts: {
+      deep: true,
+      handler() {
+        this.updateLoadingStatus();
+      }
+    }
   },
   computed: {
     openedPost() {
@@ -41,17 +53,17 @@ export default defineComponent({
     return { SidebarMode };
   },
   methods: {
+    updateLoadingStatus() {
+      if (this.posts.length) {
+        this.loadingStatus = LoadingStatus.Success;
+      } else {
+        this.loadingStatus = LoadingStatus.NoData;
+      }
+    },
     async handlePostsLoad() {
       try {
-        const loadedPosts = await getPosts(2396);
-
-        if (loadedPosts.length) {
-          this.loadingStatus = LoadingStatus.Success;
-        } else {
-          this.loadingStatus = LoadingStatus.NoData;
-        }
-
-        this.posts = loadedPosts;
+        this.posts = await getPosts(2396);
+        this.updateLoadingStatus();
       } catch {
         this.loadingStatus = LoadingStatus.Error;
       }
@@ -150,7 +162,9 @@ export default defineComponent({
             <PostPreview
               v-else-if="sidebarMode === SidebarMode.Preview && openedPost"
               :key="openedPost.id"
-              v-model="sidebarMode"
+              v-model:sidebar-mode="sidebarMode"
+              v-model:saved-name="savedName"
+              v-model:saved-email="savedEmail"
               @post-delete="handlePostRemove"
               :post="openedPost"
             />

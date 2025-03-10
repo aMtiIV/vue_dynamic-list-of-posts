@@ -2,7 +2,7 @@
 import { defineComponent, type PropType } from 'vue'
 import InputField from './InputField.vue'
 import TextAreaField from './TextAreaField.vue'
-import { Icon, SidebarMode } from '@/enums'
+import { Icon, LoadingStatus, SidebarMode } from '@/enums'
 
 export default defineComponent({
   components: {
@@ -34,14 +34,14 @@ export default defineComponent({
     body: string,
     titleError: boolean,
     bodyError: boolean,
-    sendError: boolean,
+    loadingStatus: LoadingStatus,
   } {
     return {
       title: this.startTitle || '',
       body: this.startBody || '',
       titleError: false,
       bodyError: false,
-      sendError: false,
+      loadingStatus: LoadingStatus.Success,
     }
   },
   emits: ['submit', 'update:modelValue'],
@@ -54,16 +54,16 @@ export default defineComponent({
     },
   },
   setup() {
-    return { Icon };
+    return { Icon, LoadingStatus };
   },
   methods: {
     setErrors(sendError: boolean = false, titleError: boolean = false, bodyError: boolean = false) {
-      this.sendError = sendError;
+      this.loadingStatus = sendError ? LoadingStatus.Error : LoadingStatus.Success;
       this.titleError = titleError;
       this.bodyError = bodyError;
     },
     handleSubmit() {
-      this.sendError = false;
+      this.loadingStatus = LoadingStatus.Loading;
       this.$emit('submit', this.title, this.body, this.setErrors);
     },
   },
@@ -96,7 +96,14 @@ export default defineComponent({
 
       <div class="field is-grouped">
         <div class="control">
-          <button type="submit" class="button is-link">{{confirmButtonLabel}}</button>
+          <button
+            type="submit"
+            class="button is-link"
+            :class="{'is-loading': loadingStatus === LoadingStatus.Loading}"
+            :disabled="loadingStatus === LoadingStatus.Loading"
+          >
+            {{confirmButtonLabel}}
+          </button>
         </div>
 
         <div class="control">
@@ -105,7 +112,7 @@ export default defineComponent({
           </button>
         </div>
 
-        <h3 v-if="sendError" class="mt-2 has-text-centered has-text-danger">
+        <h3 v-if="loadingStatus === LoadingStatus.Error" class="mt-2 has-text-centered has-text-danger">
           Something went wrong!
         </h3>
       </div>

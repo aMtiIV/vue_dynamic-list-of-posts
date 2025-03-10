@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue'
 import InputField from './InputField.vue'
 import TextAreaField from './TextAreaField.vue'
-import { Icon } from '@/enums'
+import { Icon, LoadingStatus } from '@/enums'
 
 export default defineComponent({
   components: {
@@ -24,7 +24,7 @@ export default defineComponent({
     nameError: boolean,
     emailError: boolean,
     bodyError: boolean,
-    sendError: boolean,
+    loadingStatus: LoadingStatus,
   } {
     return {
       name: this.startName || '',
@@ -33,7 +33,7 @@ export default defineComponent({
       nameError: false,
       emailError: false,
       bodyError: false,
-      sendError: false,
+      loadingStatus: LoadingStatus.Success,
     }
   },
   emits: ['submit', 'update:modelValue'],
@@ -49,7 +49,7 @@ export default defineComponent({
     },
   },
   setup() {
-    return { Icon };
+    return { Icon, LoadingStatus };
   },
   methods: {
     setErrors(
@@ -58,15 +58,21 @@ export default defineComponent({
       emailError: boolean = false,
       bodyError: boolean = false
     ) {
-      this.sendError = sendError;
+      this.loadingStatus = sendError ? LoadingStatus.Error : LoadingStatus.Success;
       this.nameError = nameError;
       this.emailError = emailError;
       this.bodyError = bodyError;
     },
     handleSubmit() {
-      this.sendError = false;
+      this.loadingStatus = LoadingStatus.Loading;
       this.$emit('submit', this.name, this.email, this.body, this.setErrors);
     },
+    handleClearInputs() {
+      this.name = '';
+      this.email = '';
+      this.body = '';
+      this.setErrors();
+    }
   },
 })
 </script>
@@ -104,7 +110,14 @@ export default defineComponent({
 
     <div class="field is-grouped">
       <div class="control">
-        <button type="submit" class="button is-link">Add Comment</button>
+        <button
+          type="submit"
+          class="button is-link"
+          :class="{'is-loading': loadingStatus === LoadingStatus.Loading}"
+          :disabled="loadingStatus === LoadingStatus.Loading"
+        >
+          Add Comment
+        </button>
       </div>
 
       <div class="control">
@@ -113,7 +126,13 @@ export default defineComponent({
         </button>
       </div>
 
-      <h3 v-if="sendError" class="mt-2 has-text-centered has-text-danger">
+      <div class="control">
+        <button type="reset" class="button is-link is-light" @click="handleClearInputs">
+          Clear
+        </button>
+      </div>
+
+      <h3 v-if="loadingStatus === LoadingStatus.Error" class="mt-2 has-text-centered has-text-danger">
         Something went wrong!
       </h3>
     </div>

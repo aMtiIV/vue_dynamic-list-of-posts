@@ -28,3 +28,10 @@ export type Comment = {
   createdAt: string,
   updatedAt: string,
 }
+
+export type PostCommentBody = {
+  postId: number,
+  name: string,
+  email: string,
+  body: string,
+}
