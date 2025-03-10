@@ -43,7 +43,7 @@ export default defineComponent({
   methods: {
     async handlePostsLoad() {
       try {
-        const loadedPosts = await getPosts(11);
+        const loadedPosts = await getPosts(2396);
 
         if (loadedPosts.length) {
           this.loadingStatus = LoadingStatus.Success;
@@ -63,7 +63,7 @@ export default defineComponent({
       if (trimmedTitle && trimmedBody) {
         try {
           const sentPost = await postPost({
-            userId: 11,
+            userId: 2396,
             title: trimmedTitle,
             body: trimmedBody,
           });
@@ -149,6 +149,7 @@ export default defineComponent({
 
             <PostPreview
               v-else-if="sidebarMode === SidebarMode.Preview && openedPost"
+              :key="openedPost.id"
               v-model="sidebarMode"
               @post-delete="handlePostRemove"
               :post="openedPost"

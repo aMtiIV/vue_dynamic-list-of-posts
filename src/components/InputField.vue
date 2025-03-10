@@ -48,7 +48,7 @@ export default defineComponent({
       />
 
       <span class="icon is-small is-left">
-        <i class="fas fa-user"></i>
+        <i class="fas fa-user fa-heading"></i>
       </span>
 
       <span

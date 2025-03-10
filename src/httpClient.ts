@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { PatchPostBody, Post, PostPostBody } from './types/types'
+import type { PatchPostBody, Post, PostPostBody, Comment } from './types/types'
 
 function wait(delay: number) {
   return new Promise(resolve => {
@@ -33,4 +33,10 @@ export const deletePost = (postId: number): Promise<Post> => {
   return wait(2000)
     .then(() => httpClient.delete(`/posts/${postId}`))
     .then((response) => response.data);
+}
+
+export const getComments = (postId: number): Promise<Comment[]> => {
+  return wait(2000)
+  .then(() => httpClient.get(`/comments?postId=${postId}`))
+  .then((response) => response.data);
 }
