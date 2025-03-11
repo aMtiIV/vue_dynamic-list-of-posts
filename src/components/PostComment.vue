@@ -8,7 +8,8 @@ export default defineComponent({
       type: Object as PropType<Comment>,
       required: true,
     }
-  }
+  },
+  emits: ['delete'],
 });
 </script>
 
@@ -17,7 +18,12 @@ export default defineComponent({
     <div class="message-header">
       <a :href="`mailto:${comment.email}`">{{ comment.name }}</a>
 
-      <button type="button" class="delete is-small" aria-label="delete">
+      <button
+        @click="$emit('delete', comment.id)"
+        type="button"
+        class="delete is-small"
+        aria-label="delete"
+      >
         delete button
       </button>
     </div>

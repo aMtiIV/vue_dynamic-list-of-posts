@@ -46,3 +46,9 @@ export const postComment = (comment: PostCommentBody): Promise<Comment> => {
   .then(() => httpClient.post('/comments', comment))
   .then((response) => response.data);
 }
+
+export const deleteComment = (commentId: number): Promise<Comment> => {
+  return wait(2000)
+    .then(() => httpClient.delete(`/comments/${commentId}`))
+    .then((response) => response.data);
+}

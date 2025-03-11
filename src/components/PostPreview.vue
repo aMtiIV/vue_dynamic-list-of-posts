@@ -1,6 +1,6 @@
 <script lang="ts">
 import { LoadingStatus, SidebarMode } from '@/enums';
-import { getComments, postComment } from '@/httpClient';
+import { deleteComment, getComments, postComment } from '@/httpClient';
 import type { Comment, Post } from '@/types/types';
 import { defineComponent, type PropType } from 'vue';
 import PostLoader from './PostLoader.vue';
@@ -41,12 +41,16 @@ export default defineComponent({
     loadingStatus: LoadingStatus,
     writeCommentFormOpened: boolean,
     comments: Comment[],
+    commentsDuringDeletion: Comment[] | null,
+    commentIdDuringDeletion: number | null,
   } {
     return {
       deleteError: false,
       loadingStatus: LoadingStatus.Loading,
       writeCommentFormOpened: false,
       comments: [],
+      commentsDuringDeletion: null,
+      commentIdDuringDeletion: null,
     }
   },
   mounted() {
@@ -116,6 +120,35 @@ export default defineComponent({
         setErrors(false, !trimmedName, !trimmedEmail || !isEmailValid, !trimmedBody);
       }
     },
+    async handleCommentDelete(commentId: number) {
+      const arrayToCopy = this.commentsDuringDeletion || this.comments;
+      const arrayToCopyIndex = arrayToCopy.findIndex(comment => comment.id === commentId);
+
+      this.setDeleteError();
+
+      if (arrayToCopyIndex !== -1) {
+        const commentsDuringThisDeletion = [...arrayToCopy];
+
+        commentsDuringThisDeletion.splice(arrayToCopyIndex, 1);
+        this.commentsDuringDeletion = commentsDuringThisDeletion;
+        this.commentIdDuringDeletion = commentId;
+
+        try {
+          await deleteComment(commentId);
+          const index = this.comments.findIndex(comment => comment.id === commentId);
+          this.comments.splice(index, 1);
+        } catch {
+          this.setDeleteError(true);
+        } finally {
+          if (commentId === this.commentIdDuringDeletion) {
+            this.commentsDuringDeletion = null;
+            this.commentIdDuringDeletion = null;
+          }
+        }
+      } else {
+        this.setDeleteError(true);
+      }
+    }
   },
 });
 </script>
@@ -161,7 +194,8 @@ export default defineComponent({
 
     <PostComment
       v-else
-      v-for="comment of comments"
+      v-for="comment of (commentsDuringDeletion || comments)"
+      @delete="handleCommentDelete"
       :key="comment.id"
       :comment="comment"
     />
