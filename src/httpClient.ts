@@ -1,54 +1,56 @@
 import axios from 'axios'
-import type { PatchPostBody, Post, PostPostBody, Comment, PostCommentBody } from './types/types'
-
-function wait(delay: number) {
-  return new Promise(resolve => {
-    setTimeout(resolve, delay);
-  });
-}
+import type { PatchPostBody, Post, PostPostBody, Comment, PostCommentBody, User, PostUserBody } from './types/types'
 
 const httpClient = axios.create({
   baseURL: 'https://mate.academy/students-api',
 });
 
+export const getUser = (userId: number): Promise<User> => {
+  return httpClient.get(`/users/${userId}`)
+    .then((response) => response.data);
+}
+
+export const getUsersByEmail = (email: string): Promise<User[]> => {
+  return httpClient.get(`/users?email=${email}`)
+    .then((response) => response.data);
+}
+
+export const postUser = (user: PostUserBody): Promise<User> => {
+  return httpClient.post('/users', user)
+    .then((response) => response.data);
+}
+
 export const getPosts = (userId: number): Promise<Post[]> => {
-  return wait(2000)
-    .then(() => httpClient.get(`/posts?userId=${userId}`))
+  return httpClient.get(`/posts?userId=${userId}`)
     .then((response) => response.data);
 }
 
 export const postPost = (post: PostPostBody): Promise<Post> => {
-  return wait(2000)
-    .then(() => httpClient.post('/posts', post))
+  return httpClient.post('/posts', post)
     .then((response) => response.data);
 }
 
 export const patchPost = (postId: number, post: PatchPostBody): Promise<Post> => {
-  return wait(2000)
-    .then(() => httpClient.patch(`/posts/${postId}`, post))
+  return httpClient.patch(`/posts/${postId}`, post)
     .then((response) => response.data);
 }
 
 export const deletePost = (postId: number): Promise<Post> => {
-  return wait(2000)
-    .then(() => httpClient.delete(`/posts/${postId}`))
+  return httpClient.delete(`/posts/${postId}`)
     .then((response) => response.data);
 }
 
 export const getComments = (postId: number): Promise<Comment[]> => {
-  return wait(2000)
-  .then(() => httpClient.get(`/comments?postId=${postId}`))
-  .then((response) => response.data);
+  return httpClient.get(`/comments?postId=${postId}`)
+    .then((response) => response.data);
 }
 
 export const postComment = (comment: PostCommentBody): Promise<Comment> => {
-  return wait(2000)
-  .then(() => httpClient.post('/comments', comment))
-  .then((response) => response.data);
+  return httpClient.post('/comments', comment)
+    .then((response) => response.data);
 }
 
 export const deleteComment = (commentId: number): Promise<Comment> => {
-  return wait(2000)
-    .then(() => httpClient.delete(`/comments/${commentId}`))
+  return httpClient.delete(`/comments/${commentId}`)
     .then((response) => response.data);
 }

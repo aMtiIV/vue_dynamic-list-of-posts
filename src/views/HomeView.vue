@@ -4,19 +4,22 @@ import DetailsSidebar from '@/components/DetailsSidebar.vue'
 import PostsList from '@/components/PostsList.vue'
 import { LoadingStatus, SidebarMode } from '@/enums'
 import { deletePost, getPosts, patchPost, postPost } from '@/httpClient'
-import type { Post } from '@/types/types'
+import type { Post, User } from '@/types/types'
 import type { SetAddPostErrors, SetDeletePostError, SetEditPostErrors } from '@/types/functions'
 import { defineComponent } from 'vue'
 import PostPreview from '@/components/PostPreview.vue'
+import NavHeader from '@/components/NavHeader.vue'
 
 export default defineComponent({
   components: {
+    NavHeader,
     PostsList,
     DetailsSidebar,
     AddPost,
     PostPreview,
   },
   data(): {
+    user: User;
     posts: Post[];
     loadingStatus: LoadingStatus,
     sidebarMode: SidebarMode,
@@ -24,7 +27,11 @@ export default defineComponent({
     savedName: string,
     savedEmail: string,
   } {
+    const storageValue = localStorage.getItem('user');
+    const user = storageValue && JSON.parse(storageValue);
+
     return {
+      user,
       posts: [],
       loadingStatus: LoadingStatus.Loading,
       sidebarMode: SidebarMode.Off,
@@ -34,6 +41,10 @@ export default defineComponent({
     }
   },
   mounted() {
+    if (this.user === null) {
+      this.$router.push('./login');
+    }
+
     this.handlePostsLoad();
   },
   watch: {
@@ -62,7 +73,7 @@ export default defineComponent({
     },
     async handlePostsLoad() {
       try {
-        this.posts = await getPosts(2396);
+        this.posts = await getPosts(this.user.id);
         this.updateLoadingStatus();
       } catch {
         this.loadingStatus = LoadingStatus.Error;
@@ -75,7 +86,7 @@ export default defineComponent({
       if (trimmedTitle && trimmedBody) {
         try {
           const sentPost = await postPost({
-            userId: 2396,
+            userId: this.user.id,
             title: trimmedTitle,
             body: trimmedBody,
           });
@@ -137,51 +148,55 @@ export default defineComponent({
 })
 </script>
 
-<template>
-  <main class="section">
-    <div class="container">
-      <div class="tile is-ancestor">
-        <PostsList
-          :posts="posts"
-          :loading-status="loadingStatus"
-          v-model:sidebar-mode="sidebarMode"
-          v-model:opened-post-id="openedPostId"
-        />
+<template v-if="user">
+  <template v-if="user">
+    <NavHeader :name="user.name"/>
 
-        <DetailsSidebar :class="{'Sidebar--open': sidebarMode !== SidebarMode.Off}">
-          <template #default>
-            <AddPost
-              v-if="sidebarMode === SidebarMode.Add"
-              @submit="handlePostAdd"
-              v-model="sidebarMode"
-              form-title="Create new post"
-              confirm-button-label="Create"
-              :sidebar-mode-on-cancel="SidebarMode.Off"
-            />
+    <main class="section">
+      <div class="container">
+        <div class="tile is-ancestor">
+          <PostsList
+            :posts="posts"
+            :loading-status="loadingStatus"
+            v-model:sidebar-mode="sidebarMode"
+            v-model:opened-post-id="openedPostId"
+          />
 
-            <PostPreview
-              v-else-if="sidebarMode === SidebarMode.Preview && openedPost"
-              :key="openedPost.id"
-              v-model:sidebar-mode="sidebarMode"
-              v-model:saved-name="savedName"
-              v-model:saved-email="savedEmail"
-              @post-delete="handlePostRemove"
-              :post="openedPost"
-            />
+          <DetailsSidebar :class="{'Sidebar--open': sidebarMode !== SidebarMode.Off}">
+            <template #default>
+              <AddPost
+                v-if="sidebarMode === SidebarMode.Add"
+                @submit="handlePostAdd"
+                v-model="sidebarMode"
+                form-title="Create new post"
+                confirm-button-label="Create"
+                :sidebar-mode-on-cancel="SidebarMode.Off"
+              />
 
-            <AddPost
-              v-else-if="sidebarMode === SidebarMode.Edit && openedPost"
-              @submit="handlePostEdit"
-              v-model="sidebarMode"
-              form-title="Post editing"
-              confirm-button-label="Save"
-              :sidebar-mode-on-cancel="SidebarMode.Preview"
-              :start-title="openedPost.title"
-              :start-body="openedPost.body"
-            />
-          </template>
-        </DetailsSidebar>
+              <PostPreview
+                v-else-if="sidebarMode === SidebarMode.Preview && openedPost"
+                :key="openedPost.id"
+                v-model:sidebar-mode="sidebarMode"
+                v-model:saved-name="savedName"
+                v-model:saved-email="savedEmail"
+                @post-delete="handlePostRemove"
+                :post="openedPost"
+              />
+
+              <AddPost
+                v-else-if="sidebarMode === SidebarMode.Edit && openedPost"
+                @submit="handlePostEdit"
+                v-model="sidebarMode"
+                form-title="Post editing"
+                confirm-button-label="Save"
+                :sidebar-mode-on-cancel="SidebarMode.Preview"
+                :start-title="openedPost.title"
+                :start-body="openedPost.body"
+              />
+            </template>
+          </DetailsSidebar>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </template>
 </template>
